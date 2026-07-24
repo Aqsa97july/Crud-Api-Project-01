@@ -120,3 +120,4 @@ def delete_task(task_id: int):
         status_code=404,
         detail=f"Task {task_id} not found"
     )
+  <img width="1576" height="883" alt="image" src="https://github.com/user-attachments/assets/af3f7c7e-dc0f-451d-a4f5-bc7ceb4d1647" />
