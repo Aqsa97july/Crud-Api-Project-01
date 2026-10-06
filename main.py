@@ -94,14 +94,13 @@ def get_task(task_id: int):
 def create_task(task: TaskCreate):
     if task.title.strip() == "":
         raise HTTPException(status_code=400, detail="Title cannot be empty")
-
-    cursor = conn.execute(
-        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+    row = conn.execute(
+        "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING *",
         (task.title, False)
-    )
+    ).fetchone()
     conn.commit()
 
-    return {"id": cursor.lastrowid, "title": task.title, "done": False}
+    return row_to_dict(row) 
 
 
 @app.put("/tasks/{task_id}", summary="Update task")
