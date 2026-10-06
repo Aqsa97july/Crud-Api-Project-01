@@ -81,7 +81,7 @@ def get_all_tasks():
 @app.get("/tasks/{task_id}", summary="Get one task")
 def get_task(task_id: int):
     row = conn.execute(
-        "SELECT * FROM tasks WHERE id = ?", (task_id,)
+        "SELECT * FROM tasks WHERE id = %s", (task_id,)
     ).fetchone()
 
     if row is None:
@@ -110,7 +110,7 @@ def update_task(task_id: int, updated_task: TaskUpdate):
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
     cursor = conn.execute(
-        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        "UPDATE tasks SET title = ?, done = ? WHERE id = %s",
         (updated_task.title, updated_task.done, task_id)
     )
     conn.commit()
@@ -123,7 +123,7 @@ def update_task(task_id: int, updated_task: TaskUpdate):
 
 @app.delete("/tasks/{task_id}", status_code=204, summary="Delete task")
 def delete_task(task_id: int):
-    cursor = conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    cursor = conn.execute("DELETE FROM tasks WHERE id = %s", (task_id,))
     conn.commit()
 
     if cursor.rowcount == 0:
