@@ -1,27 +1,31 @@
 from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
-import sqlite3
+import os
+import psycopg
+from psycopg.rows import dict_row
+from dotenv import load_dotenv
 
-# check_same_thread=False: FastAPI runs normal `def` endpoints in worker threads,
-# and sqlite3 refuses to share a connection across threads by default.
-conn = sqlite3.connect("tasks.db", check_same_thread=False)
-conn.row_factory = sqlite3.Row  # rows behave like dicts
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 conn.execute("""
 CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title TEXT,
     done BOOLEAN
 )
 """)
 conn.commit()
 
-count = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
+row = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()
+count = row["count"]
 if count == 0:
     seed = ["Learn Encapsulation", "Practice DLD Viva", "Study Ideology Topics"]
     for title in seed:
         conn.execute(
-            "INSERT INTO tasks (title, done) VALUES (?, ?)",
+            "INSERT INTO tasks (title, done) VALUES (%s, %s)",
             (title, False)
         )
     conn.commit()
